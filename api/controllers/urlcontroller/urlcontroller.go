@@ -3,72 +3,82 @@ package urlcontroller
 import (
 	"net/http"
 
-	"github.com/yuxxeun/gow/server/models"
-	"gorm.io/gorm"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/yuxxeun/gow/api/models"
+	"gorm.io/gorm"
 )
 
 func Index(c *fiber.Ctx) error {
-	var url []models.Url
-	models.DB.Find(&url)
+	var urls []models.Url
+	if err := models.DB.Find(&urls).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengambil data",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"data": urls,
+	})
+}
+
+func Show(c *fiber.Ctx) error {
+	var url models.Url
+	id := c.Params("id")
+
+	if err := models.DB.First(&url, id).Error; err != nil {
+		status := http.StatusInternalServerError
+		msg := "Terjadi kesalahan"
+		if err == gorm.ErrRecordNotFound {
+			status = http.StatusNotFound
+			msg = "Data tidak ditemukan"
+		}
+		return c.Status(status).JSON(fiber.Map{
+			"message": msg,
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"data": url,
 	})
 }
 
-func Show(c *fiber.Ctx) error {
-
-	id := c.Params("id")
-	var url models.Url
-	if err := models.DB.First(&url, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{
-				"message": "Data tidak ditemukan",
-			})
-		}
-
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Data tidak ditemukan",
-		})
-	}
-
-	return c.JSON(url)
-}
-
 func Create(c *fiber.Ctx) error {
-
-	var book models.Url
-	if err := c.BodyParser(&book); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
-	if err := models.DB.Create(&book).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
-	return c.JSON(book)
-}
-
-func Update(c *fiber.Ctx) error {
-
-	id := c.Params("id")
-
 	var url models.Url
 	if err := c.BodyParser(&url); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
+			"message": "Format data tidak valid",
 		})
 	}
 
-	if models.DB.Where("id = ?", id).Updates(&url).RowsAffected == 0 {
+	if err := models.DB.Create(&url).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal menyimpan data",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"data": url,
+	})
+}
+
+func Update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var url models.Url
+
+	if err := c.BodyParser(&url); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Tidak dapat mengupdate data",
+			"message": "Format data tidak valid",
+		})
+	}
+
+	result := models.DB.Model(&models.Url{}).Where("id = ?", id).Updates(url)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengupdate data",
+		})
+	}
+	if result.RowsAffected == 0 {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "Data tidak ditemukan",
 		})
 	}
 
@@ -78,13 +88,17 @@ func Update(c *fiber.Ctx) error {
 }
 
 func Delete(c *fiber.Ctx) error {
-
 	id := c.Params("id")
 
-	var book models.Url
-	if models.DB.Delete(&book, id).RowsAffected == 0 {
+	result := models.DB.Delete(&models.Url{}, id)
+	if result.Error != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal menghapus data",
+		})
+	}
+	if result.RowsAffected == 0 {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
-			"message": "Tidak dapat menghapus data",
+			"message": "Data tidak ditemukan",
 		})
 	}
 

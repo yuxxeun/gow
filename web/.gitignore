@@ -4,6 +4,8 @@ dist
 dist-ssr
 *.local
 
+*.env
+
 # ReScript
 .bsb.lock
 .merlin

@@ -20,6 +20,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      rescript-struct:
+        specifier: ^6.0.0
+        version: 6.0.0(rescript@11.1.4)
       rescript-webapi:
         specifier: ^0.9.1
         version: 0.9.1
@@ -1427,6 +1430,12 @@ packages:
 
   requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
+
+  rescript-struct@6.0.0:
+    resolution: {integrity: sha512-x5IiVMQE9JrIuExIr0+D3BsszFWfq6gVYNYOAJ5CVI+cG0nj1C0yD/BgXWHGAi2DpFVoxx6RO3o0nMCOf4OWlA==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      rescript: 11.0.x || ~11.0.0-rc
 
   rescript-vitest@1.5.0:
     resolution: {integrity: sha512-GByYfyo48vua6GojXu9D7vF72eghIYrL7m7KUvu29OwfkTPQN4U+4fnd6E72SvP7NrHByrYwxR0Cx7PmIbyGTw==}
@@ -3135,6 +3144,10 @@ snapshots:
       set-function-name: 2.0.2
 
   requires-port@1.0.0: {}
+
+  rescript-struct@6.0.0(rescript@11.1.4):
+    dependencies:
+      rescript: 11.1.4
 
   rescript-vitest@1.5.0(jsdom@24.1.3)(rescript@11.1.4)(vite@5.4.19):
     dependencies:
